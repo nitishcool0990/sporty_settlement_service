@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Include Spring defaults -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="sports-settlement-service"/>
+    <springProperty scope="context" name="lokiUrl" source="app.logging.loki.url" defaultValue="http://localhost:3100/loki/api/v1/push"/>
+
+    <!-- 1. Color Console Appender for Local Development -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] [%cyan(traceId=%X{traceId:-NONE})] [%green(eventId=%X{eventId:-NONE})] [%magenta(betId=%X{betId:-NONE})] %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. Structured JSON Console Appender (for Containerized stdout without duplicate colored lines) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${appName}"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>eventId</includeMdcKeyName>
+            <includeMdcKeyName>betId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>stage</includeMdcKeyName>
+            <timeZone>UTC</timeZone>
+        </encoder>
+    </appender>
+
+    <!-- 3. Direct Loki HTTP Appender for Grafana Loki -->
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <url>${lokiUrl}</url>
+        </http>
+        <format>
+            <label>
+                <pattern>app=${appName},level=%level</pattern>
+            </label>
+            <message>
+                <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSS'Z',UTC}","level":"%level","logger":"%logger{36}","thread":"%thread","traceId":"%X{traceId:-NONE}","eventId":"%X{eventId:-NONE}","betId":"%X{betId:-NONE}","message":"%replace(%msg){'[\r\n]+', ' '}"}</pattern>
+            </message>
+        </format>
+    </appender>
+
+    <!-- Docker profile: single JSON stream to stdout + direct push to Loki -->
+    <springProfile name="docker">
+        <root level="${LOG_LEVEL_ROOT:-INFO}">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+    <!-- Local / Test profiles: clean human-readable console -->
+    <springProfile name="!docker">
+        <root level="${LOG_LEVEL_ROOT:-INFO}">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- Application level logging: inherits active profile appenders without duplicate output -->
+    <logger name="com.sportygroup" level="${LOG_LEVEL_APP:-DEBUG}"/>
+</configuration>

@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. Apache Kafka (KRaft mode - no Zookeeper required)
+  # =========================================================================
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: sporty-kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================================================================
+  # 2. Apache RocketMQ NameServer
+  # =========================================================================
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.0
+    container_name: sporty-rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    command: sh mqnamesrv
+    healthcheck:
+      test: ["CMD-SHELL", "sh mqadmin clusterList -n localhost:9876 || exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =========================================================================
+  # 3. Apache RocketMQ Broker
+  # =========================================================================
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.0
+    container_name: sporty-rocketmq-broker
+    ports:
+      - "10911:10911"
+      - "10909:10909"
+    environment:
+      NAMESRV_ADDR: "rocketmq-namesrv:9876"
+    command: sh mqbroker -n rocketmq-namesrv:9876 autoCreateTopicEnable=true
+    depends_on:
+      - rocketmq-namesrv
+
+  # =========================================================================
+  # 4. Apache RocketMQ Dashboard (Web UI for inspecting topics & messages)
+  # =========================================================================
+  rocketmq-dashboard:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: sporty-rocketmq-dashboard
+    ports:
+      - "8088:8080"
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rocketmq-namesrv:9876"
+    depends_on:
+      - rocketmq-namesrv
+
+  # =========================================================================
+  # 5. Centralized Logging: Grafana Loki & Grafana
+  # =========================================================================
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: sporty-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: sporty-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - loki
+
+  # =========================================================================
+  # 6. Sports Betting Settlement Service (Spring Boot Application)
+  # =========================================================================
+  sports-settlement-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sporty-settlement-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: "docker"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+      ROCKETMQ_ENABLED: "true"
+      ROCKETMQ_NAME_SERVER: "rocketmq-namesrv:9876"
+      LOKI_ENABLED: "true"
+      LOKI_URL: "http://loki:3100/loki/api/v1/push"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      rocketmq-namesrv:
+        condition: service_started
+      rocketmq-broker:
+        condition: service_started

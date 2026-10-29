@@ -1,0 +1,177 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "com.sportygroup.settlement.config.AppProperties",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.kafka",
+      "type": "com.sportygroup.settlement.config.AppProperties$Kafka",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.kafka.topics",
+      "type": "com.sportygroup.settlement.config.AppProperties$Kafka$Topics",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Kafka"
+    },
+    {
+      "name": "app.logging",
+      "type": "com.sportygroup.settlement.config.AppProperties$Logging",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.logging.audit",
+      "type": "com.sportygroup.settlement.config.AppProperties$Logging$Audit",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Logging"
+    },
+    {
+      "name": "app.logging.loki",
+      "type": "com.sportygroup.settlement.config.AppProperties$Logging$Loki",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Logging"
+    },
+    {
+      "name": "app.matching",
+      "type": "com.sportygroup.settlement.config.AppProperties$Matching",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.matching.thread-pool",
+      "type": "com.sportygroup.settlement.config.AppProperties$Matching$ThreadPool",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Matching"
+    },
+    {
+      "name": "app.outbox",
+      "type": "com.sportygroup.settlement.config.AppProperties$Outbox",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.rocketmq",
+      "type": "com.sportygroup.settlement.config.AppProperties$RocketMq",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    },
+    {
+      "name": "app.rocketmq.topics",
+      "type": "com.sportygroup.settlement.config.AppProperties$RocketMq$Topics",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq"
+    },
+    {
+      "name": "app.security",
+      "type": "com.sportygroup.settlement.config.AppProperties$Security",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.kafka.concurrency",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Kafka"
+    },
+    {
+      "name": "app.kafka.topics.event-outcomes",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Kafka$Topics"
+    },
+    {
+      "name": "app.logging.audit.max-in-memory-entries",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Logging$Audit"
+    },
+    {
+      "name": "app.logging.loki.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Logging$Loki"
+    },
+    {
+      "name": "app.logging.loki.url",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Logging$Loki"
+    },
+    {
+      "name": "app.matching.thread-pool.core-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Matching$ThreadPool"
+    },
+    {
+      "name": "app.matching.thread-pool.max-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Matching$ThreadPool"
+    },
+    {
+      "name": "app.matching.thread-pool.queue-capacity",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Matching$ThreadPool"
+    },
+    {
+      "name": "app.matching.thread-pool.thread-name-prefix",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Matching$ThreadPool"
+    },
+    {
+      "name": "app.outbox.batch-size",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Outbox"
+    },
+    {
+      "name": "app.outbox.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Outbox"
+    },
+    {
+      "name": "app.outbox.max-retries",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Outbox"
+    },
+    {
+      "name": "app.outbox.poll-interval-ms",
+      "type": "java.lang.Integer",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Outbox"
+    },
+    {
+      "name": "app.rocketmq.consumer-group",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq"
+    },
+    {
+      "name": "app.rocketmq.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq"
+    },
+    {
+      "name": "app.rocketmq.name-server",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq"
+    },
+    {
+      "name": "app.rocketmq.producer-group",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq"
+    },
+    {
+      "name": "app.rocketmq.topics.bet-settlements",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$RocketMq$Topics"
+    },
+    {
+      "name": "app.security.allowed-domains",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Security"
+    },
+    {
+      "name": "app.security.auth-header-name",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Security"
+    },
+    {
+      "name": "app.security.auth-token",
+      "type": "java.lang.String",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Security"
+    },
+    {
+      "name": "app.security.domain-check-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.sportygroup.settlement.config.AppProperties$Security"
+    }
+  ],
+  "hints": []
+}

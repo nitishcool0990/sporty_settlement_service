@@ -1,0 +1,14 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:29092}
+
+app:
+  kafka:
+    embedded:
+      enabled: false
+  rocketmq:
+    name-server: ${ROCKETMQ_NAME_SERVER:rocketmq-namesrv:9876}
+  logging:
+    loki:
+      enabled: ${LOKI_ENABLED:true}
+      url: ${LOKI_URL:http://loki:3100/loki/api/v1/push}

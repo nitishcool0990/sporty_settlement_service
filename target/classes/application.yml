@@ -1,0 +1,111 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: sports-settlement-service
+  datasource:
+    url: jdbc:h2:mem:sporty_bets_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:sporty-settlement-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+app:
+  security:
+    # Optional API access token. If blank, authentication is optional for convenience.
+    auth-token: ${APP_SECURITY_TOKEN:}
+    auth-header-name: ${APP_AUTH_HEADER:X-Auth-Token}
+    # Domain authentication: only allow requests coming from authenticated origins/domains
+    domain-check-enabled: ${APP_DOMAIN_CHECK_ENABLED:false}
+    allowed-domains: ${APP_ALLOWED_DOMAINS:}
+  kafka:
+    # Multiple concurrent consumer threads to poll partitions in parallel
+    concurrency: ${KAFKA_CONSUMER_CONCURRENCY:3}
+    # If true, starts an in-process Kafka broker (standalone mode, no Docker needed) and overrides
+    # spring.kafka.bootstrap-servers. Set KAFKA_EMBEDDED=false to use an external broker via KAFKA_BOOTSTRAP_SERVERS.
+    embedded:
+      enabled: ${KAFKA_EMBEDDED:true}
+    topics:
+      event-outcomes: ${KAFKA_TOPIC_EVENT_OUTCOMES:event-outcomes}
+  matching:
+    # Dedicated thread pool for executing bet matching concurrently across multiple events
+    thread-pool:
+      core-size: ${MATCHING_POOL_CORE_SIZE:10}
+      max-size: ${MATCHING_POOL_MAX_SIZE:50}
+      queue-capacity: ${MATCHING_POOL_QUEUE_CAPACITY:500}
+      thread-name-prefix: "bet-matcher-"
+  outbox:
+    # Transactional Outbox Pattern to guarantee at-least-once settlement publishing without dual-write inconsistency
+    enabled: ${OUTBOX_ENABLED:true}
+    poll-interval-ms: ${OUTBOX_POLL_INTERVAL_MS:500}
+    batch-size: ${OUTBOX_BATCH_SIZE:50}
+    max-retries: ${OUTBOX_MAX_RETRIES:5}
+  rocketmq:
+    # If true, connects to actual RocketMQ cluster. If false, uses in-memory mock producer/consumer.
+    enabled: ${ROCKETMQ_ENABLED:false}
+    name-server: ${ROCKETMQ_NAME_SERVER:localhost:9876}
+    producer-group: ${ROCKETMQ_PRODUCER_GROUP:sporty-bet-settlement-producer-group}
+    consumer-group: ${ROCKETMQ_CONSUMER_GROUP:sporty-bet-settlement-consumer-group}
+    topics:
+      bet-settlements: ${ROCKETMQ_TOPIC_BET_SETTLEMENTS:bet-settlements}
+  logging:
+    loki:
+      enabled: ${LOKI_ENABLED:false}
+      url: ${LOKI_URL:http://localhost:3100/loki/api/v1/push}
+    audit:
+      max-in-memory-entries: ${AUDIT_MAX_ENTRIES:1000}
+
+# Keep Kafka broker/client internals quiet so application logs stay readable
+logging:
+  level:
+    kafka: WARN
+    state.change.logger: WARN
+    org.apache.kafka: WARN
+
+# Springdoc OpenAPI Swagger documentation
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+
+# Actuator Health & Metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,7 @@
+com/sportygroup/settlement/service/BetMatchingServiceTest.class
+com/sportygroup/settlement/controller/OutboxControllerTest.class
+com/sportygroup/settlement/controller/BetControllerTest.class
+com/sportygroup/settlement/util/DomainMatcherTest.class
+com/sportygroup/settlement/integration/EndToEndSettlementIntegrationTest.class
+com/sportygroup/settlement/controller/EventOutcomeControllerTest.class
+com/sportygroup/settlement/service/OutboxServiceTest.class
